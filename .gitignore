@@ -1,0 +1,32 @@
+# Runtime data created by the PHP API
+api/data/latest.json
+api/data/history.jsonl
+api/data/reset.txt
+
+# Keep the data directory itself
+!api/data/.gitkeep
+!api/data/.htaccess
+
+# Secrets / local configuration
+.env
+.env.*
+*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+error_log
+
+# Temporary files
+tmp/
+temp/
+.cache/
