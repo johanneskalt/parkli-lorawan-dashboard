@@ -1,0 +1,669 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>parkli See-Dashboard</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: #0f172a;
+      background: #e8f7f4;
+      background: linear-gradient(135deg, #e0f7ff, #f8fafc 45%, #ecfdf5);
+    }
+
+    body {
+      padding: 16px 22px 12px;
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 940px;
+      min-height: calc(100vh - 28px);
+      margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.65);
+      border-radius: 28px;
+      box-shadow: 0 14px 34px rgba(15, 23, 42, 0.12);
+      overflow: hidden;
+    }
+
+    .header {
+      position: relative;
+      min-height: 94px;
+      padding: 16px 22px;
+      margin-bottom: 12px;
+    }
+
+    .brand {
+      display: table;
+      table-layout: fixed;
+      width: 72%;
+    }
+
+    .brand-logo, .brand-text {
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+    .brand-logo { width: 94px; }
+
+    .school-mark {
+      width: 78px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 14px;
+      background: #ffffff;
+      padding: 7px;
+      display: block;
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: #0891b2;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+    }
+
+    .status {
+      position: absolute;
+      top: 18px;
+      right: 22px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 8px 13px;
+      border-radius: 999px;
+      color: white;
+      font-size: 14px;
+      font-weight: 800;
+      background: #16a34a;
+    }
+
+    .pill.offline { background: #f59e0b; }
+
+    .updated {
+      margin-top: 8px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .temps { margin-bottom: 12px; }
+
+    .temp-card {
+      position: relative;
+      padding: 18px 22px;
+      min-height: 140px;
+      margin-bottom: 12px;
+    }
+
+    .temp-card.large { min-height: 168px; }
+
+    .temp-half {
+      float: left;
+      width: calc(50% - 6px);
+    }
+
+    .temp-half.first { margin-right: 12px; }
+
+    .clearfix:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    .sensor {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .depth {
+      margin-top: 4px;
+      color: #64748b;
+      font-size: 15px;
+    }
+
+    .dot {
+      position: absolute;
+      top: 26px;
+      right: 26px;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+    }
+
+    .dot.green { background: rgba(22, 163, 74, 0.16); }
+    .dot.yellow { background: rgba(234, 179, 8, 0.18); }
+    .dot.blue { background: rgba(37, 99, 235, 0.16); }
+
+    .value {
+      margin-top: 18px;
+      white-space: nowrap;
+    }
+
+    .number {
+      display: inline-block;
+      font-size: 54px;
+      line-height: 0.9;
+      font-weight: 900;
+      letter-spacing: -0.06em;
+    }
+
+    .large .number { font-size: 76px; }
+
+    .unit {
+      display: inline-block;
+      margin-left: 7px;
+      margin-bottom: 7px;
+      color: #64748b;
+      font-size: 26px;
+      font-weight: 800;
+      vertical-align: baseline;
+    }
+
+    .chart-card {
+      padding: 16px 22px;
+      margin-bottom: 12px;
+    }
+
+    .chart-head {
+      position: relative;
+      min-height: 52px;
+      margin-bottom: 4px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 27px;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .legend {
+      position: absolute;
+      top: 3px;
+      right: 0;
+      font-size: 14px;
+      color: #64748b;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .legend-item {
+      display: inline-block;
+      margin-left: 12px;
+    }
+
+    .legend-line {
+      display: inline-block;
+      width: 24px;
+      height: 4px;
+      border-radius: 999px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 235px;
+      display: block;
+    }
+
+    .metrics { margin-bottom: 12px; }
+
+    .metric {
+      float: left;
+      width: calc(50% - 6px);
+      padding: 15px 22px;
+      min-height: 78px;
+      background: rgba(15, 23, 42, 0.92);
+      color: white;
+    }
+
+    .metric.first { margin-right: 12px; }
+
+    .metric-label {
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin-top: 5px;
+      font-size: 28px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-value span {
+      color: #94a3b8;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .logo-strip {
+      min-height: 74px;
+      padding: 10px 18px;
+      margin-bottom: 8px;
+    }
+
+    .partner-logo {
+      float: left;
+      width: 50%;
+      height: 54px;
+      overflow: hidden;
+    }
+
+    .partner-logo img {
+      max-width: 100%;
+      max-height: 54px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .partner-logo.parkli img { margin-right: auto; }
+    .partner-logo.gemeinde img { margin-left: auto; }
+
+    .footer {
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.2;
+      min-height: 14px;
+      padding: 0 6px;
+    }
+
+    .footer-left { float: left; }
+    .footer-right { float: right; text-align: right; }
+
+    /* Low-height iPad mode, e.g. old iPad landscape with Safari bars */
+    @media (max-height: 780px) {
+      body { padding: 10px 16px 8px; }
+      .app { max-width: 960px; min-height: 0; }
+      .card { border-radius: 22px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.1); }
+      .header { min-height: 76px; padding: 12px 18px; margin-bottom: 9px; }
+      .brand-logo { width: 78px; }
+      .school-mark { width: 62px; height: 44px; padding: 5px; border-radius: 11px; }
+      .eyebrow { font-size: 11px; letter-spacing: 0.18em; }
+      h1 { font-size: 30px; }
+      .status { top: 13px; right: 18px; }
+      .pill { padding: 7px 11px; font-size: 13px; }
+      .updated { margin-top: 6px; font-size: 12px; }
+      .temps { margin-bottom: 9px; }
+      .temp-card, .temp-card.large, .temp-half {
+        float: left;
+        width: calc(33.333% - 7px);
+        min-height: 132px;
+        margin-bottom: 0;
+        padding: 15px 18px;
+      }
+      .temp-card.large { margin-right: 10px; }
+      .temp-half.first { margin-right: 10px; }
+      .sensor { font-size: 18px; }
+      .depth { font-size: 14px; }
+      .dot { top: 18px; right: 18px; width: 38px; height: 38px; }
+      .value { margin-top: 18px; }
+      .number, .large .number { font-size: 50px; }
+      .unit { font-size: 21px; margin-left: 4px; }
+      .chart-card { padding: 14px 18px; margin-bottom: 9px; }
+      .chart-head { min-height: 44px; margin-bottom: 0; }
+      h2 { font-size: 24px; }
+      .subtitle { font-size: 12px; margin-top: 3px; }
+      .legend { font-size: 12px; top: 2px; }
+      .legend-item { margin-left: 8px; }
+      .legend-line { width: 20px; height: 3px; margin-right: 4px; }
+      canvas { height: 205px; }
+      .metrics { margin-bottom: 9px; }
+      .metric { min-height: 62px; padding: 11px 18px; }
+      .metric-label { font-size: 10px; }
+      .metric-value { margin-top: 4px; font-size: 22px; }
+      .metric-value span { font-size: 14px; }
+      .logo-strip { min-height: 60px; padding: 8px 16px; margin-bottom: 6px; }
+      .partner-logo { height: 44px; }
+      .partner-logo img { max-height: 44px; }
+      .footer { font-size: 11px; }
+    }
+
+    @media (orientation: portrait) and (min-height: 900px) {
+      .app { max-width: 820px; }
+      canvas { height: 250px; }
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 12px; }
+      .header { padding: 13px 16px; }
+      .brand { width: 70%; }
+      h1 { font-size: 27px; }
+      .eyebrow { font-size: 11px; letter-spacing: 0.18em; }
+      .temp-card, .temp-card.large, .temp-half {
+        float: none;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+      }
+      .metric { padding: 12px 16px; }
+      .partner-logo { height: 44px; }
+      .partner-logo img { max-height: 44px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="card header">
+      <div class="brand">
+        <div class="brand-logo">
+          <img class="school-mark" src="assets/Georg_Kropp_Schule_Logo.png" alt="Georg-Kropp-Schule Wüstenrot">
+        </div>
+        <div class="brand-text">
+          <p class="eyebrow">parkli See-Boje</p>
+          <h1>Wassertemperatur</h1>
+        </div>
+      </div>
+
+      <div class="status">
+        <div id="statusPill" class="pill">● Live</div>
+        <div id="updatedAt" class="updated">–</div>
+      </div>
+    </header>
+
+    <section class="temps clearfix">
+      <article class="card temp-card large">
+        <div class="sensor">Sensor 1</div>
+        <div class="depth">0,5 m Tiefe</div>
+        <div class="dot green"></div>
+        <div class="value"><span id="temp1" class="number">–</span><span class="unit">°C</span></div>
+      </article>
+
+      <article class="card temp-card temp-half first">
+        <div class="sensor">Sensor 2</div>
+        <div class="depth">1,5 m Tiefe</div>
+        <div class="dot yellow"></div>
+        <div class="value"><span id="temp2" class="number">–</span><span class="unit">°C</span></div>
+      </article>
+
+      <article class="card temp-card temp-half">
+        <div class="sensor">Sensor 3</div>
+        <div class="depth">2,5 m Tiefe</div>
+        <div class="dot blue"></div>
+        <div class="value"><span id="temp3" class="number">–</span><span class="unit">°C</span></div>
+      </article>
+    </section>
+
+    <section class="card chart-card">
+      <div class="chart-head">
+        <div>
+          <h2>Temperaturverlauf</h2>
+          <div class="subtitle">Letzte 2 Monate · 3 Tiefenschichten</div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-line" style="background:#16a34a"></span>0,5 m</span>
+          <span class="legend-item"><span class="legend-line" style="background:#eab308"></span>1,5 m</span>
+          <span class="legend-item"><span class="legend-line" style="background:#2563eb"></span>2,5 m</span>
+        </div>
+      </div>
+      <canvas id="chart" width="1200" height="500"></canvas>
+    </section>
+
+    <section class="metrics clearfix">
+      <article class="card metric first">
+        <div class="metric-label">pH-Wert</div>
+        <div class="metric-value" id="ph">–</div>
+      </article>
+      <article class="card metric">
+        <div class="metric-label">TDS / Leitwert</div>
+        <div class="metric-value"><span id="tds">–</span> <span>ppm</span></div>
+      </article>
+    </section>
+
+    <section class="card logo-strip clearfix" aria-label="Projektpartner">
+      <div class="partner-logo parkli"><img src="assets/ParKli_Logo_400px.jpg" alt="ParKli"></div>
+      <div class="partner-logo gemeinde"><img src="assets/gemeindelogo2009.png" alt="Gemeinde Wüstenrot"></div>
+    </section>
+
+    <footer class="footer clearfix">
+      <span id="battery" class="footer-left">Batterie: –</span>
+      <span id="signal" class="footer-right">RSSI: – · SNR: –</span>
+    </footer>
+  </main>
+
+  <script>
+    var API_URL = "/api/parkli/latest/";
+    var REFRESH_MS = 60000;
+    var colors = { s1: "#16a34a", s2: "#eab308", s3: "#2563eb", grid: "rgba(100, 116, 139, 0.28)", text: "#64748b" };
+    var lastData = null;
+    var resizeTimer = null;
+
+    function numberOrNull(value) {
+      var n = Number(value);
+      return isFinite(n) ? n : null;
+    }
+
+    function formatTemp(value) {
+      var n = numberOrNull(value);
+      return n === null ? "–" : n.toFixed(1);
+    }
+
+    function pad2(n) { return n < 10 ? "0" + n : String(n); }
+
+    function formatDateTime(value) {
+      if (!value) return "–";
+      var d = new Date(value);
+      if (isNaN(d.getTime())) return "–";
+      var days = ["So.", "Mo.", "Di.", "Mi.", "Do.", "Fr.", "Sa."];
+      return days[d.getDay()] + " " + pad2(d.getDate()) + "." + pad2(d.getMonth() + 1) + ". " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
+    }
+
+    function formatDateLabel(value) {
+      var d = new Date(value);
+      if (isNaN(d.getTime())) return "";
+      return pad2(d.getDate()) + "." + pad2(d.getMonth() + 1) + ".";
+    }
+
+    function setText(id, value) {
+      var el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function setStatus(isLive) {
+      var pill = document.getElementById("statusPill");
+      if (!pill) return;
+      pill.textContent = isLive ? "● Live" : "● Offline";
+      pill.className = isLive ? "pill" : "pill offline";
+    }
+
+    function getHistoryLastTwoMonths(history) {
+      var result = [];
+      var cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 2);
+      if (!history || !history.length) return result;
+      for (var i = 0; i < history.length; i++) {
+        var item = history[i];
+        var dateValue = item.timestamp || item.date;
+        var d = dateValue ? new Date(dateValue) : null;
+        if (d && !isNaN(d.getTime()) && d >= cutoff) {
+          result.push({
+            label: item.timestamp ? formatDateLabel(item.timestamp) : item.date,
+            s1: numberOrNull(item.s1),
+            s2: numberOrNull(item.s2),
+            s3: numberOrNull(item.s3)
+          });
+        }
+      }
+      return result;
+    }
+
+    function drawChart(history) {
+      var canvas = document.getElementById("chart");
+      if (!canvas || !canvas.getContext) return;
+      var ctx = canvas.getContext("2d");
+      var rect = canvas.getBoundingClientRect();
+      var ratio = window.devicePixelRatio || 1;
+      if (!rect.width || !rect.height) return;
+      canvas.width = Math.round(rect.width * ratio);
+      canvas.height = Math.round(rect.height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      var width = rect.width;
+      var height = rect.height;
+      ctx.clearRect(0, 0, width, height);
+      var padding = { top: 14, right: 22, bottom: 30, left: 48 };
+      var plotW = width - padding.left - padding.right;
+      var plotH = height - padding.top - padding.bottom;
+      var values = [];
+      var keys = ["s1", "s2", "s3"];
+      for (var i = 0; i < history.length; i++) {
+        for (var k = 0; k < keys.length; k++) {
+          var v = history[i][keys[k]];
+          if (typeof v === "number" && isFinite(v)) values.push(v);
+        }
+      }
+      if (history.length < 2 || values.length === 0) {
+        ctx.fillStyle = colors.text;
+        ctx.font = "15px -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Noch nicht genug Messwerte für ein Diagramm vorhanden.", width / 2, height / 2);
+        return;
+      }
+      var min = Math.min.apply(null, values);
+      var max = Math.max.apply(null, values);
+      if (min === max) { min -= 1; max += 1; }
+      else { var valuePad = Math.max(0.5, (max - min) * 0.15); min -= valuePad; max += valuePad; }
+      function x(index) { return padding.left + (index / (history.length - 1)) * plotW; }
+      function y(value) { return padding.top + (1 - (value - min) / (max - min)) * plotH; }
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = colors.grid;
+      ctx.fillStyle = colors.text;
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, Arial, sans-serif";
+      var gridLines = 4;
+      for (var g = 0; g <= gridLines; g++) {
+        var gy = padding.top + (g / gridLines) * plotH;
+        var labelValue = max - (g / gridLines) * (max - min);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, gy);
+        ctx.lineTo(width - padding.right, gy);
+        ctx.stroke();
+        ctx.textAlign = "right";
+        ctx.fillText(labelValue.toFixed(1) + "°", padding.left - 8, gy + 4);
+      }
+      var labelCount = Math.min(5, history.length);
+      for (var li = 0; li < labelCount; li++) {
+        var index = Math.round((li / Math.max(1, labelCount - 1)) * (history.length - 1));
+        var gx = x(index);
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = "center";
+        ctx.fillText(history[index].label || "", gx, height - 10);
+      }
+      function drawLine(key, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+        var started = false;
+        for (var i = 0; i < history.length; i++) {
+          var value = history[i][key];
+          if (typeof value !== "number" || !isFinite(value)) { started = false; continue; }
+          if (!started) { ctx.moveTo(x(i), y(value)); started = true; }
+          else { ctx.lineTo(x(i), y(value)); }
+        }
+        ctx.stroke();
+        for (var j = history.length - 1; j >= 0; j--) {
+          var pointValue = history[j][key];
+          if (typeof pointValue === "number" && isFinite(pointValue)) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.arc(x(j), y(pointValue), 5, 0, Math.PI * 2);
+            ctx.fill();
+            break;
+          }
+        }
+      }
+      drawLine("s1", colors.s1);
+      drawLine("s2", colors.s2);
+      drawLine("s3", colors.s3);
+    }
+
+    function updateDashboard(data) {
+      lastData = data || {};
+      var temperature = lastData.temperature || {};
+      setText("temp1", formatTemp(temperature.s1));
+      setText("temp2", formatTemp(temperature.s2));
+      setText("temp3", formatTemp(temperature.s3));
+      setText("updatedAt", formatDateTime(lastData.updatedAt));
+      var ph = numberOrNull(lastData.ph);
+      var tds = numberOrNull(lastData.tds);
+      setText("ph", ph === null ? "–" : ph.toFixed(2));
+      setText("tds", tds === null ? "–" : String(Math.round(tds)));
+      var battery = numberOrNull(lastData.battery);
+      var rssi = numberOrNull(lastData.rssi);
+      var snr = numberOrNull(lastData.snr);
+      setText("battery", battery === null ? "Batterie: –" : "Batterie: " + Math.round(battery) + "%");
+      setText("signal", "RSSI: " + (rssi === null ? "–" : Math.round(rssi)) + " dBm · SNR: " + (snr === null ? "–" : snr.toFixed(1)) + " dB");
+      drawChart(getHistoryLastTwoMonths(lastData.history || []));
+    }
+
+    function loadData() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", API_URL + "?t=" + new Date().getTime(), true);
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try {
+            var data = JSON.parse(xhr.responseText);
+            updateDashboard(data);
+            setStatus(true);
+          } catch (e) { setStatus(false); }
+        } else { setStatus(false); }
+      };
+      xhr.onerror = function () { setStatus(false); };
+      xhr.send(null);
+    }
+
+    window.onresize = function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        if (lastData) updateDashboard(lastData);
+        else loadData();
+      }, 150);
+    };
+
+    loadData();
+    setInterval(loadData, REFRESH_MS);
+  </script>
+</body>
+</html>

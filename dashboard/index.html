@@ -1,0 +1,865 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>parkli See-Dashboard</title>
+
+  <style>
+    :root {
+      --bg1: #e0f7ff;
+      --bg2: #ecfdf5;
+      --card: rgba(255, 255, 255, 0.88);
+      --dark: #0f172a;
+      --muted: #64748b;
+      --green: #16a34a;
+      --yellow: #eab308;
+      --blue: #2563eb;
+      --cyan: #0891b2;
+      --shadow: 0 16px 42px rgba(15, 23, 42, 0.13);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--dark);
+      background: linear-gradient(135deg, var(--bg1), #f8fafc 45%, var(--bg2));
+    }
+
+    body {
+      padding: 18px 24px 14px;
+      overflow-x: hidden;
+    }
+
+    .app {
+      width: min(100%, 820px);
+      height: calc(100vh - 32px);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+
+    .parkli-mark {
+      width: 72px;
+      height: 58px;
+      object-fit: contain;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.75);
+      padding: 6px;
+      flex: 0 0 auto;
+    }
+
+    .school-mark {
+      background: #050505;
+      padding: 8px;
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1;
+      letter-spacing: -0.045em;
+      white-space: nowrap;
+    }
+
+    .status {
+      text-align: right;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      color: white;
+      font-size: 14px;
+      font-weight: 850;
+      background: #16a34a;
+    }
+
+    .pill.offline {
+      background: #f59e0b;
+    }
+
+    .updated {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .temps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .temp-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .temp-card {
+      padding: 18px 22px;
+      min-height: 142px;
+    }
+
+    .temp-card.large {
+      min-height: 172px;
+    }
+
+    .temp-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .sensor {
+      font-size: 20px;
+      font-weight: 850;
+    }
+
+    .depth {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .dot {
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      flex: 0 0 auto;
+    }
+
+    .dot.green { background: rgba(22, 163, 74, 0.16); }
+    .dot.yellow { background: rgba(234, 179, 8, 0.18); }
+    .dot.blue { background: rgba(37, 99, 235, 0.16); }
+
+    .value {
+      margin-top: 18px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    .number {
+      font-size: 52px;
+      line-height: 0.9;
+      font-weight: 950;
+      letter-spacing: -0.06em;
+    }
+
+    .large .number {
+      font-size: 76px;
+    }
+
+    .unit {
+      margin-bottom: 7px;
+      color: var(--muted);
+      font-size: 26px;
+      font-weight: 850;
+    }
+
+    .chart-card {
+      padding: 18px 22px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 27px;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 750;
+      padding-top: 3px;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-line {
+      width: 22px;
+      height: 4px;
+      border-radius: 999px;
+    }
+
+    canvas {
+      width: 100%;
+      height: 250px;
+      display: block;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .metric {
+      padding: 16px 22px;
+      background: rgba(15, 23, 42, 0.9);
+      color: white;
+    }
+
+    .metric-label {
+      color: #94a3b8;
+      font-size: 13px;
+      font-weight: 850;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .metric-value {
+      margin-top: 5px;
+      font-size: 28px;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-value span {
+      color: #94a3b8;
+      font-size: 18px;
+      font-weight: 850;
+    }
+
+    .logo-strip {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 18px;
+      min-height: 78px;
+    }
+
+    .partner-logo {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 58px;
+      overflow: hidden;
+    }
+
+    .partner-logo img {
+      max-width: 100%;
+      max-height: 58px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .partner-logo.gemeinde {
+      justify-content: flex-end;
+    }
+
+    .partner-logo.gemeinde img {
+      max-height: 64px;
+    }
+
+    .partner-logo.schule {
+      background: #050505;
+      border-radius: 16px;
+      padding: 8px 12px;
+    }
+
+    .partner-logo.parkli {
+      justify-content: flex-start;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 12px;
+      }
+
+      .app {
+        height: calc(100vh - 24px);
+        gap: 10px;
+      }
+
+      .card {
+        border-radius: 24px;
+      }
+
+      header {
+        padding: 14px 16px;
+        gap: 12px;
+      }
+
+      .parkli-mark {
+        width: 58px;
+        height: 48px;
+        border-radius: 14px;
+      }
+
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.2em;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .updated {
+        font-size: 12px;
+      }
+
+      .pill {
+        padding: 7px 10px;
+        font-size: 13px;
+      }
+
+      .temps,
+      .temp-row,
+      .metrics {
+        gap: 10px;
+      }
+
+      .temp-card {
+        padding: 14px 16px;
+        min-height: 118px;
+      }
+
+      .temp-card.large {
+        min-height: 144px;
+      }
+
+      .sensor {
+        font-size: 18px;
+      }
+
+      .depth {
+        font-size: 14px;
+      }
+
+      .dot {
+        width: 40px;
+        height: 40px;
+      }
+
+      .value {
+        margin-top: 14px;
+      }
+
+      .number {
+        font-size: 44px;
+      }
+
+      .large .number {
+        font-size: 62px;
+      }
+
+      .unit {
+        font-size: 22px;
+      }
+
+      .chart-card {
+        padding: 14px 16px;
+      }
+
+      h2 {
+        font-size: 23px;
+      }
+
+      .subtitle,
+      .legend {
+        font-size: 12px;
+      }
+
+      canvas {
+        height: 220px;
+      }
+
+      .metric {
+        padding: 13px 16px;
+      }
+
+      .metric-label {
+        font-size: 11px;
+      }
+
+      .metric-value {
+        font-size: 24px;
+      }
+
+      .logo-strip {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 8px 14px;
+        min-height: 62px;
+      }
+
+      .partner-logo {
+        height: 46px;
+      }
+
+      .partner-logo img {
+        max-height: 46px;
+      }
+
+      .partner-logo.gemeinde img {
+        max-height: 50px;
+      }
+
+      .partner-logo.schule {
+        border-radius: 12px;
+        padding: 6px 8px;
+      }
+
+      footer {
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="card">
+      <div class="brand">
+        <img class="parkli-mark school-mark" src="assets/Georg_Kropp_Schule_Logo.png" alt="Georg-Kropp-Schule Wüstenrot">
+        <div>
+          <p class="eyebrow">parkli See-Boje</p>
+          <h1>Wassertemperatur</h1>
+        </div>
+      </div>
+
+      <div class="status">
+        <div id="statusPill" class="pill">● Live</div>
+        <div id="updatedAt" class="updated">–</div>
+      </div>
+    </header>
+
+    <section class="temps">
+      <article class="card temp-card large">
+        <div class="temp-head">
+          <div>
+            <div class="sensor">Sensor 1</div>
+            <div class="depth">0,5 m Tiefe</div>
+          </div>
+          <div class="dot green"></div>
+        </div>
+        <div class="value">
+          <div id="temp1" class="number">–</div>
+          <div class="unit">°C</div>
+        </div>
+      </article>
+
+      <div class="temp-row">
+        <article class="card temp-card">
+          <div class="temp-head">
+            <div>
+              <div class="sensor">Sensor 2</div>
+              <div class="depth">1,5 m Tiefe</div>
+            </div>
+            <div class="dot yellow"></div>
+          </div>
+          <div class="value">
+            <div id="temp2" class="number">–</div>
+            <div class="unit">°C</div>
+          </div>
+        </article>
+
+        <article class="card temp-card">
+          <div class="temp-head">
+            <div>
+              <div class="sensor">Sensor 3</div>
+              <div class="depth">2,5 m Tiefe</div>
+            </div>
+            <div class="dot blue"></div>
+          </div>
+          <div class="value">
+            <div id="temp3" class="number">–</div>
+            <div class="unit">°C</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="card chart-card">
+      <div class="chart-head">
+        <div>
+          <h2>Temperaturverlauf</h2>
+          <div class="subtitle">Letzte 2 Monate · 3 Tiefenschichten</div>
+        </div>
+
+        <div class="legend">
+          <span class="legend-item"><span class="legend-line" style="background:#16a34a"></span>0,5 m</span>
+          <span class="legend-item"><span class="legend-line" style="background:#eab308"></span>1,5 m</span>
+          <span class="legend-item"><span class="legend-line" style="background:#2563eb"></span>2,5 m</span>
+        </div>
+      </div>
+
+      <canvas id="chart" width="1500" height="620"></canvas>
+    </section>
+
+    <section class="metrics">
+      <article class="card metric">
+        <div class="metric-label">pH-Wert</div>
+        <div class="metric-value" id="ph">–</div>
+      </article>
+
+      <article class="card metric">
+        <div class="metric-label">TDS / Leitwert</div>
+        <div class="metric-value"><span id="tds">–</span> <span>ppm</span></div>
+      </article>
+    </section>
+
+    <section class="card logo-strip two-logos" aria-label="Projektpartner">
+      <div class="partner-logo parkli">
+        <img src="assets/ParKli_Logo_400px.jpg" alt="ParKli">
+      </div>
+      <div class="partner-logo gemeinde">
+        <img src="assets/gemeindelogo2009.png" alt="Gemeinde Wüstenrot">
+      </div>
+    </section>
+
+    <footer>
+      <span id="battery">Batterie: –</span>
+      <span id="signal">RSSI: – · SNR: –</span>
+    </footer>
+  </main>
+
+  <script>
+    const API_URL = "/api/parkli/latest/";
+    const REFRESH_MS = 60_000;
+
+    const colors = {
+      s1: "#16a34a",
+      s2: "#eab308",
+      s3: "#2563eb",
+      grid: "rgba(100, 116, 139, 0.28)",
+      text: "#64748b",
+      dark: "#0f172a"
+    };
+
+    function numberOrNull(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function formatTemp(value) {
+      const n = numberOrNull(value);
+      return n === null ? "–" : n.toFixed(1);
+    }
+
+    function formatDateTime(value) {
+      if (!value) return "–";
+
+      try {
+        return new Intl.DateTimeFormat("de-DE", {
+          weekday: "short",
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(new Date(value));
+      } catch {
+        return "–";
+      }
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function setStatus(isLive) {
+      const pill = document.getElementById("statusPill");
+      pill.textContent = isLive ? "● Live" : "● Offline";
+      pill.classList.toggle("offline", !isLive);
+    }
+
+    function getHistoryLastTwoMonths(history) {
+      if (!Array.isArray(history)) return [];
+
+      const cutoff = new Date();
+      cutoff.setMonth(cutoff.getMonth() - 2);
+
+      return history
+        .filter(item => {
+          const dateValue = item.timestamp || item.date;
+          const d = dateValue ? new Date(dateValue) : null;
+          return d && !Number.isNaN(d.getTime()) && d >= cutoff;
+        })
+        .map(item => ({
+          label: item.timestamp
+            ? new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "2-digit" }).format(new Date(item.timestamp))
+            : item.date,
+          s1: numberOrNull(item.s1),
+          s2: numberOrNull(item.s2),
+          s3: numberOrNull(item.s3)
+        }));
+    }
+
+    function drawChart(history) {
+      const canvas = document.getElementById("chart");
+      const ctx = canvas.getContext("2d");
+
+      const rect = canvas.getBoundingClientRect();
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.round(rect.width * ratio);
+      canvas.height = Math.round(rect.height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+      const width = rect.width;
+      const height = rect.height;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const padding = {
+        top: 16,
+        right: 22,
+        bottom: 34,
+        left: 48
+      };
+
+      const plotW = width - padding.left - padding.right;
+      const plotH = height - padding.top - padding.bottom;
+
+      const values = [];
+      history.forEach(p => {
+        ["s1", "s2", "s3"].forEach(key => {
+          if (Number.isFinite(p[key])) values.push(p[key]);
+        });
+      });
+
+      if (history.length < 2 || values.length === 0) {
+        ctx.fillStyle = colors.text;
+        ctx.font = "16px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Noch nicht genug Messwerte für ein Diagramm vorhanden.", width / 2, height / 2);
+        return;
+      }
+
+      let min = Math.min(...values);
+      let max = Math.max(...values);
+
+      if (min === max) {
+        min -= 1;
+        max += 1;
+      } else {
+        const pad = Math.max(0.5, (max - min) * 0.15);
+        min -= pad;
+        max += pad;
+      }
+
+      function x(i) {
+        return padding.left + (i / (history.length - 1)) * plotW;
+      }
+
+      function y(v) {
+        return padding.top + (1 - (v - min) / (max - min)) * plotH;
+      }
+
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = colors.grid;
+      ctx.fillStyle = colors.text;
+      ctx.font = "12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif";
+
+      const gridLines = 5;
+      for (let i = 0; i <= gridLines; i++) {
+        const gy = padding.top + (i / gridLines) * plotH;
+        const value = max - (i / gridLines) * (max - min);
+
+        ctx.beginPath();
+        ctx.moveTo(padding.left, gy);
+        ctx.lineTo(width - padding.right, gy);
+        ctx.stroke();
+
+        ctx.textAlign = "right";
+        ctx.fillText(value.toFixed(1) + "°", padding.left - 8, gy + 4);
+      }
+
+      const labelCount = Math.min(6, history.length);
+      for (let i = 0; i < labelCount; i++) {
+        const index = Math.round((i / Math.max(1, labelCount - 1)) * (history.length - 1));
+        const gx = x(index);
+
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = "center";
+        ctx.fillText(history[index].label || "", gx, height - 12);
+      }
+
+      function drawLine(key, color) {
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.beginPath();
+
+        let started = false;
+
+        history.forEach((point, i) => {
+          const value = point[key];
+
+          if (!Number.isFinite(value)) {
+            started = false;
+            return;
+          }
+
+          if (!started) {
+            ctx.moveTo(x(i), y(value));
+            started = true;
+          } else {
+            ctx.lineTo(x(i), y(value));
+          }
+        });
+
+        ctx.stroke();
+
+        const lastIndex = [...history].reverse().findIndex(p => Number.isFinite(p[key]));
+        if (lastIndex !== -1) {
+          const realIndex = history.length - 1 - lastIndex;
+          const point = history[realIndex];
+
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(x(realIndex), y(point[key]), 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      drawLine("s1", colors.s1);
+      drawLine("s2", colors.s2);
+      drawLine("s3", colors.s3);
+    }
+
+    function updateDashboard(data) {
+      const temperature = data.temperature || {};
+
+      setText("temp1", formatTemp(temperature.s1));
+      setText("temp2", formatTemp(temperature.s2));
+      setText("temp3", formatTemp(temperature.s3));
+
+      setText("updatedAt", formatDateTime(data.updatedAt));
+
+      const ph = numberOrNull(data.ph);
+      const tds = numberOrNull(data.tds);
+
+      setText("ph", ph === null ? "–" : ph.toFixed(2));
+      setText("tds", tds === null ? "–" : Math.round(tds).toString());
+
+      const battery = numberOrNull(data.battery);
+      const rssi = numberOrNull(data.rssi);
+      const snr = numberOrNull(data.snr);
+
+      setText("battery", battery === null ? "Batterie: –" : `Batterie: ${Math.round(battery)}%`);
+      setText("signal", `RSSI: ${rssi === null ? "–" : Math.round(rssi)} dBm · SNR: ${snr === null ? "–" : snr.toFixed(1)} dB`);
+
+      drawChart(getHistoryLastTwoMonths(data.history));
+    }
+
+    async function loadData() {
+      try {
+        const response = await fetch(API_URL, {
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("HTTP " + response.status);
+        }
+
+        const data = await response.json();
+        updateDashboard(data);
+        setStatus(true);
+      } catch (error) {
+        console.error("Konnte parkli-Daten nicht laden:", error);
+        setStatus(false);
+      }
+    }
+
+    let resizeTimer = null;
+    window.addEventListener("resize", () => {
+      window.clearTimeout(resizeTimer);
+      resizeTimer = window.setTimeout(loadData, 150);
+    });
+
+    loadData();
+    setInterval(loadData, REFRESH_MS);
+  </script>
+</body>
+</html>

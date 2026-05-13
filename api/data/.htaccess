@@ -1,0 +1,2 @@
+# Optional: prevent direct public access to stored JSON files.
+Require all denied

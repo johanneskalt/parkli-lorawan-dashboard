@@ -1,0 +1,30 @@
+{
+  "end_device_ids": {
+    "device_id": "YOUR-DEVICE-ID",
+    "application_ids": {
+      "application_id": "YOUR-APPLICATION-ID"
+    }
+  },
+  "received_at": "2026-05-13T09:20:54.503924991Z",
+  "uplink_message": {
+    "decoded_payload": {
+      "Air_Temperature": 20.91,
+      "BatterieProzent": 90,
+      "Humidity": 49.73,
+      "Leitwert": 0,
+      "PH": 1178,
+      "Pressure": 951,
+      "Temperatur_1": 18.87,
+      "Temperatur_2": 20.06,
+      "Temperatur_3": 19.37,
+      "Temperatur_4": -127,
+      "Temperatur_5": -127
+    },
+    "rx_metadata": [
+      {
+        "rssi": -48,
+        "snr": 11.2
+      }
+    ]
+  }
+}
