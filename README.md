@@ -136,6 +136,117 @@ https://YOUR-SUBDOMAIN.example.org/api/admin/reset-history.php?secret=CHANGE_ME_
 
 Change the secret in `api/admin/reset-history.php` before deploying.
 
+## Current implementation notes
+
+### Sensor mapping
+
+The physical board sensor order does not match the public display order.
+
+The public dashboard shows the sensors from the water surface downwards:
+
+Sensor 1 = 0.5 m depth  
+Sensor 2 = 1.5 m depth  
+Sensor 3 = 2.5 m depth
+
+The TTN payload is mapped like this:
+
+decoded_payload.Temperatur_2 → dashboard temperature.s1 → Sensor 1 / 0.5 m  
+decoded_payload.Temperatur_3 → dashboard temperature.s2 → Sensor 2 / 1.5 m  
+decoded_payload.Temperatur_1 → dashboard temperature.s3 → Sensor 3 / 2.5 m
+
+The surface temperature used for pH and TDS compensation is decoded_payload.Temperatur_2.
+
+### pH and TDS calculation
+
+pH and TDS are calculated in the webhook receiver:
+
+api/ttn/uplink/index.php
+
+The frontend dashboard does not calculate these values. It only displays the processed values returned by the JSON API.
+
+The pH value is calculated from decoded_payload.PH and the surface temperature.
+
+The TDS value is calculated from decoded_payload.Leitwert and the surface temperature.
+
+The API also stores selected raw values for debugging, including raw pH, raw conductivity and the original temperature values from the board.
+
+Example raw debug values:
+
+raw.ph = 1154  
+raw.leitwert = 0  
+raw.temperature_1 = 19.93  
+raw.temperature_2 = 19.43  
+raw.temperature_3 = 20.18
+
+### Moving average for pH and TDS
+
+The public API calculates a moving average for pH and TDS in:
+
+api/parkli/latest/index.php
+
+The current moving-average window is:
+
+6 valid measurements
+
+The API response contains both the latest calculated values and the averaged values.
+
+Example fields:
+
+phLatest = latest calculated pH value  
+tdsLatest = latest calculated TDS value  
+phAverage = moving average for pH  
+tdsAverage = moving average for TDS  
+averageWindow = number of valid measurements used for smoothing
+
+The dashboard reads ph and tds from the API response. These values are set to the moving-average values when available.
+
+### History recording
+
+The temperature chart history is stored in:
+
+api/data/history.jsonl
+
+Each TTN uplink appends one JSON line to this file.
+
+Important implementation detail:
+
+Create $historyEntry first, then encode and write it to history.jsonl.
+
+Writing the file before $historyEntry exists breaks the history recording.
+
+Runtime files such as latest.json, history.jsonl, debug.log and reset.txt should not be committed to GitHub.
+
+### Legacy iPad support
+
+Older iPads may display the normal dashboard incorrectly when launched as a Home Screen web app.
+
+For those devices, use:
+
+kiosk_legacy.html
+
+instead of:
+
+index.html
+
+The legacy file avoids modern JavaScript and CSS features and is more compatible with old Safari/WebView versions.
+
+On very old iPads, adding a separate kiosk_legacy.html file to the Home Screen may work better than adding the root index.html URL, because iOS can cache Home Screen web apps aggressively.
+
+### Debugging TTN webhook writes
+
+For debugging webhook delivery, the uplink endpoint can write to:
+
+api/data/debug.log
+
+A successful TTN webhook call should show entries similar to:
+
+Webhook called. Method: POST  
+Raw body length: ...  
+latest.json written. Device: ...  
+history.jsonl written
+
+GET requests in the debug log usually come from manual browser tests and are expected to be rejected, because the TTN webhook endpoint only accepts POST requests.
+
 ## iPad kiosk usage
 
 For a clean fullscreen view:
