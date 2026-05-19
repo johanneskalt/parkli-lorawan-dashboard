@@ -1,41 +1,18 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
 
-$dataDir = __DIR__ . '/../../data';
-
-if (!is_dir($dataDir)) {
-    mkdir($dataDir, 0775, true);
-}
-
-$debugFile = $dataDir . '/debug.log';
-
-function debug_log_line($message) {
-    global $debugFile;
-    file_put_contents(
-        $debugFile,
-        '[' . gmdate('c') . '] ' . $message . PHP_EOL,
-        FILE_APPEND | LOCK_EX
-    );
-}
-
-debug_log_line('Webhook called. Method: ' . ($_SERVER['REQUEST_METHOD'] ?? 'unknown'));
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed. Use POST.']);
-    debug_log_line('Rejected: not POST');
     exit;
 }
 
 $raw = file_get_contents('php://input');
-debug_log_line('Raw body length: ' . strlen($raw));
-
 $body = json_decode($raw, true);
 
 if (!is_array($body)) {
     http_response_code(400);
     echo json_encode(['error' => 'Invalid JSON']);
-    debug_log_line('Rejected: invalid JSON');
     exit;
 }
 
@@ -49,6 +26,7 @@ function clean_temperature($value) {
 
     $n = floatval($value);
 
+    // -127 bedeutet bei euch offenbar: Sensor nicht vorhanden / ungültig
     if ($n <= -100) {
         return null;
     }
@@ -60,13 +38,16 @@ function numeric_or_null($value) {
     return is_numeric($value) ? floatval($value) : null;
 }
 
-function calculate_ph($phRaw, $tempSurface) {
-    if (!is_numeric($phRaw) || !is_numeric($tempSurface)) {
+$phRaw = numeric_or_null($decoded['PH'] ?? null);
+$leitwertRaw = numeric_or_null($decoded['Leitwert'] ?? null);
+
+function calculate_ph($phRaw, $temp1) {
+    if (!is_numeric($phRaw) || !is_numeric($temp1)) {
         return null;
     }
 
     $ph_raw = floatval($phRaw);
-    $temp1 = floatval($tempSurface);
+    $temp1 = floatval($temp1);
 
     $ph = -(
         8.34290473e+02
@@ -83,21 +64,16 @@ function calculate_ph($phRaw, $tempSurface) {
     return $ph;
 }
 
-function calculate_tds($leitwertRaw, $tempSurface) {
-    if (!is_numeric($leitwertRaw) || !is_numeric($tempSurface)) {
+function calculate_tds($leitwertRaw, $temp1) {
+    if (!is_numeric($leitwertRaw) || !is_numeric($temp1)) {
         return null;
     }
 
     $leitwertRaw = floatval($leitwertRaw);
-    $temp1 = floatval($tempSurface);
+    $temp1 = floatval($temp1);
 
     $voltage = $leitwertRaw * 3.3 / 2400;
     $compensationCoefficient = 1.0 + 0.02 * ($temp1 - 25.0);
-
-    if ($compensationCoefficient == 0) {
-        return null;
-    }
-
     $compensationVoltage = $voltage / $compensationCoefficient;
 
     $tds = (
@@ -109,54 +85,33 @@ function calculate_tds($leitwertRaw, $tempSurface) {
     return $tds;
 }
 
-// Rohwerte aus dem Board
-$tempRaw1 = clean_temperature($decoded['Temperatur_1'] ?? null);
-$tempRaw2 = clean_temperature($decoded['Temperatur_2'] ?? null);
-$tempRaw3 = clean_temperature($decoded['Temperatur_3'] ?? null);
-
-// Korrekte Tiefenzuordnung:
-//
-// Board Temperatur_2 = 0,5 m
-// Board Temperatur_3 = 1,5 m
-// Board Temperatur_1 = 2,5 m
-//
-// Dashboard:
-// Sensor 1 = 0,5 m
-// Sensor 2 = 1,5 m
-// Sensor 3 = 2,5 m
-$tempSensor1 = $tempRaw2;
-$tempSensor2 = $tempRaw3;
-$tempSensor3 = $tempRaw1;
-
-// Oberflächentemperatur für pH/TDS-Kompensation
-$tempSurface = $tempRaw2;
+$temp1 = clean_temperature($decoded['Temperatur_1'] ?? null);
+$temp2 = clean_temperature($decoded['Temperatur_2'] ?? null);
+$temp3 = clean_temperature($decoded['Temperatur_3'] ?? null);
 
 $phRaw = numeric_or_null($decoded['PH'] ?? null);
 $leitwertRaw = numeric_or_null($decoded['Leitwert'] ?? null);
 
-$phCalculated = calculate_ph($phRaw, $tempSurface);
-$tdsCalculated = calculate_tds($leitwertRaw, $tempSurface);
+$phCalculated = calculate_ph($phRaw, $temp1);
+$tdsCalculated = calculate_tds($leitwertRaw, $temp1);
 
 $measurement = [
     'deviceId' => $body['end_device_ids']['device_id'] ?? null,
     'updatedAt' => $body['received_at'] ?? $body['uplink_message']['received_at'] ?? gmdate('c'),
 
     'temperature' => [
-        's1' => $tempSensor1,
-        's2' => $tempSensor2,
-        's3' => $tempSensor3,
-    ],
+	's1' => $temp1,
+	's2' => $temp2,
+	's3' => $temp3,    ],
 
-    'ph' => $phCalculated,
-    'tds' => $tdsCalculated,
+	'ph' => $phCalculated,
 
-    'raw' => [
-        'ph' => $phRaw,
-        'leitwert' => $leitwertRaw,
-        'temperature_1' => $tempRaw1,
-        'temperature_2' => $tempRaw2,
-        'temperature_3' => $tempRaw3
-    ],
+	'tds' => $tdsCalculated,
+
+     'raw' => [
+    'ph' => $phRaw,
+    'leitwert' => $leitwertRaw
+	],
 
     'battery' => numeric_or_null($decoded['BatterieProzent'] ?? null),
     'rssi' => numeric_or_null($rx['rssi'] ?? null),
@@ -167,22 +122,17 @@ $measurement = [
     'pressure' => numeric_or_null($decoded['Pressure'] ?? null)
 ];
 
-$latestFile = $dataDir . '/latest.json';
+$dataDir = __DIR__ . '/../../data';
 
-$latestWritten = file_put_contents(
-    $latestFile,
+if (!is_dir($dataDir)) {
+    mkdir($dataDir, 0775, true);
+}
+
+file_put_contents(
+    $dataDir . '/latest.json',
     json_encode($measurement, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
     LOCK_EX
 );
-
-if ($latestWritten === false) {
-    debug_log_line('ERROR: could not write latest.json');
-    http_response_code(500);
-    echo json_encode(['error' => 'Could not write latest.json']);
-    exit;
-}
-
-debug_log_line('latest.json written. Device: ' . ($measurement['deviceId'] ?? 'unknown'));
 
 $historyEntry = [
     'timestamp' => $measurement['updatedAt'],
@@ -194,22 +144,11 @@ $historyEntry = [
     'tds' => $measurement['tds']
 ];
 
-$historyFile = $dataDir . '/history.jsonl';
-
-$historyWritten = file_put_contents(
-    $historyFile,
+file_put_contents(
+    $dataDir . '/history.jsonl',
     json_encode($historyEntry, JSON_UNESCAPED_SLASHES) . PHP_EOL,
     FILE_APPEND | LOCK_EX
 );
-
-if ($historyWritten === false) {
-    debug_log_line('ERROR: could not write history.jsonl');
-    http_response_code(500);
-    echo json_encode(['error' => 'Could not write history.jsonl']);
-    exit;
-}
-
-debug_log_line('history.jsonl written');
 
 http_response_code(204);
 exit;
