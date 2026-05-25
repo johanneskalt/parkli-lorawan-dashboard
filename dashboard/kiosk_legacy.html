@@ -467,9 +467,13 @@
     var resizeTimer = null;
 
     function numberOrNull(value) {
-      var n = Number(value);
-      return isFinite(n) ? n : null;
-    }
+		if (value === null || typeof value === "undefined" || value === "") {
+		return null;
+		}
+
+		var n = Number(value);
+		return isFinite(n) ? n : null;
+	}
 
     function formatTemp(value) {
       var n = numberOrNull(value);

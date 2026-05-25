@@ -57,11 +57,11 @@
       vertical-align: middle;
     }
 
-    .brand-logo { width: 94px; }
+    .brand-logo { width: 280px; }
 
     .school-mark {
-      width: 78px;
-      height: 58px;
+      width: 250px;
+      height: 70px;
       object-fit: contain;
       border-radius: 14px;
       background: #ffffff;
@@ -385,7 +385,7 @@
     <header class="card header">
       <div class="brand">
         <div class="brand-logo">
-          <img class="school-mark" src="Georg_Kropp_Schule_Logo.png" alt="Georg-Kropp-Schule Wüstenrot">
+          <a href="https://www.gks-wuestenrot.de/" target="_blank" rel="noopener noreferrer"><img class="school-mark" src="Georg_Kropp_Schule_Logo.png" alt="Georg-Kropp-Schule Wüstenrot"></a>
         </div>
         <div class="brand-text">
           <p class="eyebrow">parkli See-Boje</p>
@@ -449,8 +449,8 @@
     </section>
 
     <section class="card logo-strip clearfix" aria-label="Projektpartner">
-      <div class="partner-logo parkli"><img src="ParKli_Logo_400px.jpg" alt="ParKli"></div>
-      <div class="partner-logo gemeinde"><img src="gemeindelogo2009.png" alt="Gemeinde Wüstenrot"></div>
+      <div class="partner-logo parkli"><a href="https://parkli.de/" target="_blank" rel="noopener noreferrer"><img src="ParKli_Logo_400px.jpg" alt="ParKli"></a></div>
+      <div class="partner-logo gemeinde"><a href="https://www.gemeinde-wuestenrot.de/de/startseite" target="_blank" rel="noopener noreferrer"><img src="gemeindelogo2009.png" alt="Gemeinde Wüstenrot"></a></div>
     </section>
 
     <footer class="footer clearfix">
@@ -467,9 +467,13 @@
     var resizeTimer = null;
 
     function numberOrNull(value) {
-      var n = Number(value);
-      return isFinite(n) ? n : null;
-    }
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
 
     function formatTemp(value) {
       var n = numberOrNull(value);
